@@ -32,4 +32,36 @@ self.addEventListener('activate', (event) => {
         }).then(() => self.clients.claim()));
 });
 
+// Fetch
+self.addEventListener('fetch', (event) => {
+    if (event.request.url.includes('/api/')) {
+        event.respondWith(
+            caches.open(RUNTIME).then(cache => {
+                return fetch(event.request).then(response => {
+                    // Stores cache
+                    if (response.status === 200) {
+                        cache.put(event.request.url, response.clone())
+                    }
+                    return response;
+                }).catch(err => {
+                    // If request fails, pulls from cache
+                    return cache.match(event.request);
+                });
+            }).catch(err => console.log(err))
+        ); return;
+    }
+    event.respondWith(
+        fetch(event.request).catch(function () {
+            return caches.match(event.request).then(function (response) {
+                if (response) {
+                    return response;
+                } else if (event.request.headers.get('accept').includes('text/html')) {
+                    // Returns cached homepage
+                    return caches.match('/');
+                }
+            })
+        })
+    )
+});
+
 
