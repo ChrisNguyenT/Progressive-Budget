@@ -1,8 +1,7 @@
 let db;
-let version;
 
 // Indexed database for budget
-const request = indexedDB.open('budget', version || 1);
+const request = indexedDB.open('budget', 1);
 
 // Upgrade newest version
 request.onupgradeneeded = function (event) {
