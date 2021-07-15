@@ -8,7 +8,7 @@ const FILES_TO_CACHE = [
     '/icons/icon-512x512.png',
 ];
 
-const PRECACHE = 'precache-test-v1';
+const PRECACHE = 'precache-v2';
 const RUNTIME = 'runtime';
 
 // Install
@@ -20,14 +20,14 @@ self.addEventListener('install', (event) => {
 
 // Activate to clear old cache
 self.addEventListener('activate', (event) => {
-    const current_cache = [PRECACHE, RUNTIME];
+    const currentCaches = [PRECACHE, RUNTIME];
     event.waitUntil(
-        caches.keys().then((cacheName) => {
-            return cacheName.filter((cache_name) => !current_cache.includes(cache_name));
-        }).then((cacheDelete) => {
+        caches.keys().then((cacheNames) => {
+            return cacheNames.filter((cacheName) => !currentCaches.includes(cacheName));
+        }).then((cachesToDelete) => {
             return Promise.all(
-                cacheDelete.map((cache_delete) => {
-                    return caches.delete(cache_delete);
+                cachesToDelete.map((cacheToDelete) => {
+                    return caches.delete(cacheToDelete);
                 }));
         }).then(() => self.clients.claim()));
 });
@@ -36,7 +36,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     if (event.request.url.includes('/api/')) {
         event.respondWith(
-            caches.open(RUNTIME).then(cache => {
+            caches.open(RUNTIME).then((cache) => {
                 return fetch(event.request).then(response => {
                     // Stores cache
                     if (response.status === 200) {
